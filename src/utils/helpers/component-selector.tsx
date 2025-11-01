@@ -1,20 +1,19 @@
 import { forwardRef } from 'react'
 
 function componentSelector<T extends string, K>(
-    components: Record<string, any>,
-    ommitedKeys?: (keyof (K & { variation?: T; ref?: any; locked?: boolean }))[]
+    components: Record<string, any>
 ) {
-    type Selector = K & { variation?: T; ref?: any; locked?: boolean }
+    type WrapperProps = K & { variation?: T; ref?: any; locked?: boolean }
 
     if (!components?.default) {
         throw new Error(`No default component defined in components.`)
     }
 
-    const componentWrapper = forwardRef<any, Omit<Selector, keyof typeof ommitedKeys>>((props, ref) => {
-        const variation = props.variation ?? 'default'
+    const componentWrapper = forwardRef<any, WrapperProps>((props, ref) => {
+        const { variation = 'default', ...rest } = props
         const component = components[variation] || components.default
-
-        return component(props as K, ref)
+        
+        return component(rest as K, ref)
     })
 
     return componentWrapper
